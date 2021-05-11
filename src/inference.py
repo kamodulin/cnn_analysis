@@ -1,5 +1,4 @@
 import torch
-from tqdm import tqdm
 
 from data_loader import load_data
 
@@ -7,11 +6,13 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 data = load_data()
 
-def predict():
+def predict(model):
+    model.eval()
+    
     total, correct = 0, 0
 
     with torch.no_grad():
-        for images, labels in tqdm(data):
+        for images, labels in data:
             images, labels = images.to(device), labels.to(device)
             
             output = model(images)
