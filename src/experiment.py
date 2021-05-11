@@ -19,7 +19,7 @@ if __name__ == "__main__":
             for percent in tqdm(percentages, desc="percent", leave=False):
                 for layer in tqdm(layers.keys(), desc="layers", leave=False):            
                     model = get_model() # get a fresh AlexNet each iteration
-                    knockout(model, layers[layer], percent, level)
+                    knockout(model, layers[layer], percent)
                     accuracy = predict(model)
                     
                     experiment = f'{layer}_run{str(run)}_p{str(percent)}'
