@@ -9,6 +9,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 data = load_data()
 
 def predict(model):
+    model.to(device)
     model.eval()
     
     total, correct = 0, 0
