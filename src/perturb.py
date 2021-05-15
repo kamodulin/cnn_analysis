@@ -32,7 +32,7 @@ def node_knockout(W, b, percent):
 
     return new_W, new_b
 
-def knockout(model, layer, percent, level="synapse"):
+def knockout(model, layer, percent, level):
     if level == "synapse":
         f = synapse_knockout
 

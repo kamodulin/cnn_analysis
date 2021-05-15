@@ -15,7 +15,7 @@ def predict(model):
     total, correct = 0, 0
 
     with torch.no_grad():
-        for images, labels in tqdm(data, desc="predict", leave=False):
+        for images, labels in tqdm(data, desc="batch", leave=False):
             images, labels = images.to(device), labels.to(device)
             
             output = model(images)
