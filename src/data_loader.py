@@ -12,6 +12,6 @@ def load_data():
 
     validation_set = datasets.ImageNet(root="../data/", split="val", transform=preprocess)
 
-    loader = torch.utils.data.DataLoader(validation_set, batch_size=2250, shuffle=True, num_workers=2)
+    loader = torch.utils.data.DataLoader(validation_set, batch_size=2400, shuffle=True, num_workers=2)
 
     return loader

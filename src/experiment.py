@@ -20,9 +20,9 @@ if __name__ == "__main__":
     logging.basicConfig(filename=f"logs/{timestamp}.log", filemode="a", format="%(message)s", datefmt="%m/%d/%Y %I:%M:%S %p", level=logging.DEBUG)
     logging.info(f"INFO:repeats={args.repeat}, level={args.level}")
 
-    for layer in tqdm(layers.keys(), desc="layer"):
+    for layer in tqdm(layers.keys(), desc="layer", leave=False):
         for fraction in tqdm([x / 10 for x in range(0, 11)], desc="fraction", leave=False):
-            for repeat in tqdm(range(args.repeat), desc="repeat", leave=False):          
+            for repeat in tqdm(range(int(args.repeat)), desc="repeat", leave=False):          
                 model = get_model()
                 knockout(model, layers[layer], fraction, level=args.level)
                 accuracy = predict(model)
