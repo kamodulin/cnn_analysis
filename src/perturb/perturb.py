@@ -1,38 +1,36 @@
 import random
 import torch
 
-from state import get_params, set_params
-
-def _random_indices(n, percent):
-    idx = random.sample(range(n), round(n * percent))
+def random_indices(n, fraction):
+    idx = random.sample(range(n), round(n * fraction))
     return idx
 
-def synapse_knockout(W, b, percent):
+def synapse_knockout(W, b, fraction):
     new_params = []
 
     for params in [W, b]:
         n_params = params.numel()
         mask = torch.ones(n_params)
-        idx = _random_indices(n_params, percent)
+        idx = random_indices(n_params, fraction)
         mask[idx] = 0
 
         new_params.append(params * mask.reshape(params.shape))
 
     return new_params
 
-def node_knockout(W, b, percent):
+def node_knockout(W, b, fraction):
     new_W = W.clone()
     new_b = b.clone()
     
     n_nodes = len(b)
-    idx = _random_indices(n_nodes, percent)
+    idx = random_indices(n_nodes, fraction)
     
     new_W[idx, :] = 0
     new_b[idx] = 0
 
     return new_W, new_b
 
-def knockout(model, layer, percent, level):
+def knockout(model, layer, level, fraction):
     if level == "synapse":
         f = synapse_knockout
 
@@ -42,6 +40,6 @@ def knockout(model, layer, percent, level):
     else:
         return None
 
-    W, b = get_params(model, layer)
-    new_W, new_b = f(W, b, percent)
-    set_params(model, layer, new_W, new_b)
+    W, b = model.get_params(layer)
+    new_W, new_b = f(W, b, fraction)
+    model.set_params(layer, new_W, new_b)

@@ -1,7 +1,6 @@
 .DS_Store
 *.pyc
 __pycache__
-data/
 .env
 *.h5
 *.emf

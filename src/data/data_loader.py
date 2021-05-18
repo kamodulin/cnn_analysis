@@ -2,7 +2,7 @@ import torch
 
 from torchvision import datasets, transforms
 
-def load_data():
+def load_validation_set():
     preprocess = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
