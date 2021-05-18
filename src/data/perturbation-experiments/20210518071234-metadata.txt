@@ -1,0 +1,4 @@
+layers: ['dense3']
+levels: ['synapse', 'node']
+fractions: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+repeats: range(0, 1)

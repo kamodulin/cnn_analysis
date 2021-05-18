@@ -1,0 +1,7 @@
+layer, level, fraction, repeat, accuracy
+dense3, synapse, 0.0, 0, 0.79072
+dense3, synapse, 0.2, 0, 0.75922
+dense3, synapse, 0.4, 0, 0.7045
+dense3, synapse, 0.6, 0, 0.62164
+dense3, synapse, 0.8, 0, 0.43644
+dense3, synapse, 1.0, 0, 0.005
