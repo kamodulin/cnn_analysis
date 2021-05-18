@@ -8,7 +8,7 @@ def random_indices(n, fraction):
 def synapse_knockout(W, b, fraction):
     new_params = []
 
-    for params in [W, b]:
+    for params in (W, b):
         n_params = params.numel()
         mask = torch.ones(n_params)
         idx = random_indices(n_params, fraction)

@@ -1,6 +1,5 @@
 import argparse
 import os
-import pandas as pd
 
 from collections import OrderedDict
 from datetime import datetime
@@ -27,8 +26,8 @@ class Experiment:
         self.accuracy_score = correct / total
     
     def save(self):
-        df = pd.DataFrame(data=[self.layer, self.level, self.fraction, self.repeat])
-        df.to_csv(self.filepath, mode='a', header=False)
+        with open(self.filepath, "a") as f:
+            f.write(f"{self.layer}, {self.level}, {self.fraction}, {self.repeat}, {self.accuracy_score}\n")
 
 class Manager:
     def __init__(self, params):
@@ -49,7 +48,7 @@ class Manager:
         return expts
 
     def create_files(self):
-        basedir = os.path.dirname("data/perturbation-experiments/")
+        basedir ="data/perturbation-experiments/"
         
         if not os.path.exists(basedir):
             os.makedirs(basedir)
@@ -62,60 +61,31 @@ class Manager:
                 f.write(f"{str(key)}: {str(value)}\n")
         
         with open(csv, "w") as f:
-            f.write("layer, level, fraction, repeat")
+            f.write("layer, level, fraction, repeat, accuracy\n")
         
         return csv
 
 if __name__ == "__main__":
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--layers", action="store", default=None)
+    # parser.add_argument("--levels", action="store", default="synapse")
+    # parser.add_argument("--repeats", action="store", default=1)
+    # parser.add_argument("--fractions", action="store", default=None)
+
+    # args = parser.parse_args()
+
     params = OrderedDict(
-        layers = ["conv1", "conv2"],
+        # model = "alexnet",
+        layers = ["conv1", "conv2", "conv3", "conv4", "conv5", "dense1", "dense2", "dense3"],
         levels = ["synapse", "node"],
         fractions = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-        repeats = range(3)    
+        repeats = range(3)
     )
 
     m = Manager(params)
 
-    for expt in m.expts:
+    for expt in tqdm(m.expts, desc="experiment"):
         model = AlexNet(pretrained=True)
         knockout(model, expt.layer, expt.level, expt.fraction)
-        expt.accuracy(model.predict())
+        expt.accuracy(*model.predict())
         expt.save()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("-r", "--repeats", action="store", default=1)
-#     parser.add_argument("-l", "--level", action="store", default="synapse")
-
-#     args = parser.parse_args()
-
-#     # timestamp = datetime.now().strftime("%Y%m%d_%I%M%S")
-#     # logging.basicConfig(filename=f"logs/{timestamp}.log", filemode="a", format="%(message)s", datefmt="%m/%d/%Y %I:%M:%S %p", level=logging.DEBUG)
-#     # logging.info(f"INFO:repeats={args.repeats}, level={args.level}")
-
-#     # for layer in tqdm(layers.keys(), desc="layer", leave=False):
-#     #     for fraction in tqdm([x / 10 for x in range(0, 11)], desc="fraction", leave=False):
-#     #         for repeat in tqdm(range(int(args.repeat)), desc="repeat", leave=False):
-
-#                 model = AlexNet(pretrained=True)
-#                 knockout(model, layer, fraction, level=args.level)
-#                 EXPT.accuracy_score(model.predict())
-
-#                 accuracy = predict(model)
-                
-#                 experiment = f"EXPT:layer={layer}, repeat={str(repeat+1)}, fraction={str(fraction)}"
-
-#                 logging.info(f"{experiment}, accuracy={accuracy}")

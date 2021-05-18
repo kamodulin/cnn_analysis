@@ -6,3 +6,4 @@ __pycache__
 *.emf
 .ipynb_checkpoints
 *.ipynb
+src/data/imagenet/

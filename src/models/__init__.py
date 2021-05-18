@@ -1,1 +1,1 @@
-from models import AlexNet
+from models.models import AlexNet

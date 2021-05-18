@@ -1,0 +1,3 @@
+layer, level, fraction, repeat, accuracy
+conv1, synapse, 0.0, 0, 0.7907
+conv1, synapse, 0.0, 1, 0.79072

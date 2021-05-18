@@ -8,7 +8,7 @@ class BaseNet:
     def __init__(self, model):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model = model
-        
+
     def _get_state(self):
         return self.model.state_dict()
 
@@ -36,7 +36,7 @@ class BaseNet:
 
         self._set_state(state_dict)
 
-    def predict():
+    def predict(self):
         model = self.model
 
         model.to(self.device)
@@ -48,7 +48,7 @@ class BaseNet:
 
         with torch.no_grad():
             for images, labels in validation_set:
-                images, labels = images.to(device), labels.to(device)
+                images, labels = images.to(self.device), labels.to(self.device)
                 
                 output = model(images)
                 
@@ -67,8 +67,12 @@ class BaseNet:
 
 class AlexNet(BaseNet):
     def __init__(self, pretrained=False):
-        super(AlexNet, self).__init__(models.alexnet(pretrained))
+        super(AlexNet, self).__init__(models.alexnet())
 
+        if pretrained:
+            weights = torch.load("data/model-weights/alexnet-pytorch-pretrained.pth")
+            self._set_state(weights)
+        
         self.layers = {
             "conv1": {
                 "weight": "features.0.weight",
