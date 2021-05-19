@@ -1,1 +1,1 @@
-from data.data_loader import load_validation_set
+from data.data_loader import load_data

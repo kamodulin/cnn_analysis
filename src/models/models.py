@@ -2,7 +2,7 @@ import torch
 
 from torchvision import models
 
-from data.data_loader import load_validation_set
+from data.data_loader import load_data
 
 class BaseNet:
     def __init__(self, model):
@@ -36,13 +36,54 @@ class BaseNet:
 
         self._set_state(state_dict)
 
+    def train(self):
+        self.model.to(self.device)
+        
+        epochs = 90
+        training_set = load_data("train", batch_size=32)
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0001)
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
+        
+        for epoch in range(epochs):
+            self.model.train()
+            
+            batch, training_loss = 0, 0
+
+            for images, labels in training_set:
+                images, labels = images.to(self.device), labels.to(self.device)
+                
+                optimizer.zero_grad()
+                
+                output = self.model(images)
+                loss = criterion(output, labels)
+                loss.backward()
+                optimizer.step()
+
+                training_loss = += loss.item()
+
+                if batch % 100 == 99:
+                    print(f"[{epoch + 1}, {batch + 1}] loss: {training_loss / 100}")
+                    training_loss = 0.0
+
+                batch += 1
+
+            lr_scheduler.step()
+
+            checkpoint = {
+                'model': self._get_state(),
+                'optimizer': optimizer.state_dict(),
+                'lr_scheduler': lr_scheduler.state_dict(),
+                'epoch': epoch
+                }
+
+            torch.save(checkpoint, PATH=f"data/model-weights/{self.name}-epoch{epoch}")
+
     def predict(self):
-        model = self.model
+        self.model.to(self.device)
+        self.model.eval()
 
-        model.to(self.device)
-        model.eval()
-
-        validation_set = load_validation_set()
+        validation_set = load_data("val", batch_size=2400)
 
         correct, total = 0, 0
 
@@ -50,7 +91,7 @@ class BaseNet:
             for images, labels in validation_set:
                 images, labels = images.to(self.device), labels.to(self.device)
                 
-                output = model(images)
+                output = self.model(images)
                 
                 probabilities = torch.nn.functional.softmax(output, dim=1)
                 _, predicted = torch.topk(probabilities, 5)
@@ -70,9 +111,11 @@ class AlexNet(BaseNet):
         super(AlexNet, self).__init__(models.alexnet())
 
         if pretrained:
-            weights = torch.load("data/model-weights/alexnet-pytorch-pretrained.pth")
+            weights = torch.load("data/model-weights/alexnet-pytorch-pretrained.pth") #only model_state_dict
             self._set_state(weights)
-        
+
+        self.name = "alexnet"
+
         self.layers = {
             "conv1": {
                 "weight": "features.0.weight",
