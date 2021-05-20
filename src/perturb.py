@@ -5,6 +5,7 @@ def random_indices(n, fraction):
     idx = random.sample(range(n), round(n * fraction))
     return idx
 
+
 def synapse_knockout(W, b, fraction):
     new_params = []
 
@@ -18,6 +19,7 @@ def synapse_knockout(W, b, fraction):
 
     return new_params
 
+
 def node_knockout(W, b, fraction):
     new_W = W.clone()
     new_b = b.clone()
@@ -29,6 +31,7 @@ def node_knockout(W, b, fraction):
     new_b[idx] = 0
 
     return new_W, new_b
+
 
 def knockout(model, layer, level, fraction):
     if level == "synapse":
