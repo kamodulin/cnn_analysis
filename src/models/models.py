@@ -45,6 +45,15 @@ class BaseNet:
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0001)
         lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
         
+        checkpoint = {
+            'model': self._get_state(),
+            'optimizer': optimizer.state_dict(),
+            'lr_scheduler': lr_scheduler.state_dict(),
+            'epoch': 0
+            }
+
+        torch.save(checkpoint, PATH=f"data/model-weights/{self.name}-base")
+
         for epoch in range(epochs):
             self.model.train()
             
