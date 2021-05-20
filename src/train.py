@@ -1,4 +1,5 @@
 from models import AlexNet
 
-model = AlexNet()
-model.train()
+if __name__ == "__main__":
+    model = AlexNet()
+    model.train()

@@ -37,29 +37,39 @@ class BaseNet:
         self._set_state(state_dict)
 
     def train(self):
+        import datetime
+        import time
+        from tqdm import tqdm
+
         self.model.to(self.device)
         
         epochs = 90
-        training_set = load_data("train", batch_size=32)
+        batch_size = 32
+        training_set = load_data("train", batch_size=batch_size, num_workers=8)
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0001)
         lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
         
         checkpoint = {
             'model': self._get_state(),
-            'optimizer': optimizer.state_dict(),
-            'lr_scheduler': lr_scheduler.state_dict(),
+            # 'optimizer': optimizer.state_dict(),
+            # 'lr_scheduler': lr_scheduler.state_dict(),
             'epoch': 0
             }
 
-        torch.save(checkpoint, PATH=f"data/model-weights/{self.name}-base")
+        torch.save(checkpoint, f"data/model-weights/{self.name}-base.pth")
+        
+        for epoch in range(1, epochs+1):
 
-        for epoch in range(epochs):
+            print(f"Epoch {epoch}/{epochs}")
+            start_time = time.time()
+            
             self.model.train()
             
-            batch, training_loss = 0, 0
+            training_loss = 0
+            correct, total = 0, 0
 
-            for images, labels in training_set:
+            for images, labels in tqdm(training_set, leave=False):
                 images, labels = images.to(self.device), labels.to(self.device)
                 
                 optimizer.zero_grad()
@@ -69,30 +79,35 @@ class BaseNet:
                 loss.backward()
                 optimizer.step()
 
-                training_loss = += loss.item()
-
-                if batch % 100 == 99:
-                    print(f"[{epoch + 1}, {batch + 1}] loss: {training_loss / 100}")
-                    training_loss = 0.0
-
-                batch += 1
-
+                training_loss += loss.item()
+                
+                probabilities = torch.nn.functional.softmax(output, dim=1)
+                _, predicted = torch.topk(probabilities, 5)
+                
+                total += labels.size(0)
+                
+                for i in range(labels.size(0)):
+                    correct += int(labels[i] in predicted[i])
+            
             lr_scheduler.step()
 
             checkpoint = {
                 'model': self._get_state(),
-                'optimizer': optimizer.state_dict(),
-                'lr_scheduler': lr_scheduler.state_dict(),
+                # 'optimizer': optimizer.state_dict(),
+                # 'lr_scheduler': lr_scheduler.state_dict(),
                 'epoch': epoch
                 }
 
-            torch.save(checkpoint, PATH=f"data/model-weights/{self.name}-epoch{epoch}")
+            torch.save(checkpoint, f"data/model-weights/{self.name}-epoch{epoch}.pth")
+
+            epoch_time_str = str(datetime.timedelta(seconds=int(time.time() - start_time)))
+            print(f"Epoch duration: {epoch_time_str} - loss: {training_loss / 100:.3f} - acc: {correct / total:.3f}")
 
     def predict(self):
         self.model.to(self.device)
         self.model.eval()
 
-        validation_set = load_data("val", batch_size=2400)
+        validation_set = load_data("val", batch_size=2400, num_workers=6)
 
         correct, total = 0, 0
 
