@@ -56,5 +56,5 @@ class AlexNet(BaseNet):
         }
         
     def set_pretrained_weights(self):
-        weights = torch.load("data/model-weights/alexnet-pytorch-pretrained.pth")
+        weights = torch.load("~/data/model-weights/alexnet-pytorch-pretrained.pth")
         self.set_state(weights)

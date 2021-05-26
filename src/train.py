@@ -40,8 +40,8 @@ def train_one_epoch(model, epoch, batch_size, criterion, optimizer, lr_scheduler
 
     torch.save({
     'model': model.get_state(),
-    'epoch': 0
-    }, f"data/model-weights/{model.name}-epoch{epoch}.pth")
+    'epoch': epoch
+    }, f"~/data/model-weights/{model.name}-epoch{epoch}.pth")
 
     epoch_time_str = str(datetime.timedelta(seconds=int(time.time() - start_time)))
     print(f"Epoch duration: {epoch_time_str} - loss: {training_loss / batch_size:.3f} - acc: {accuracy_score(y_true, y_pred):.3f}")
@@ -53,7 +53,7 @@ def train(model, epochs, batch_size, criterion, optimizer, lr_scheduler, num_wor
     torch.save({
         'model': model.get_state(),
         'epoch': 0
-    }, f"data/model-weights/{model.name}-base.pth")
+    }, f"~/data/model-weights/{model.name}-base.pth")
 
     for epoch in range(1, epochs+1):
         print(f"Epoch {epoch/epochs}")
@@ -62,13 +62,13 @@ def train(model, epochs, batch_size, criterion, optimizer, lr_scheduler, num_wor
 
 if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    
+
     model = AlexNet()
     model.to(device)
 
     epochs = 90
-    batch_size = 32
-    num_workers = 8
+    batch_size = 256
+    num_workers = 15
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0001)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
