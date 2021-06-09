@@ -2,8 +2,6 @@
 *.pyc
 __pycache__
 .env
-*.h5
-*.emf
 .ipynb_checkpoints
-*.ipynb
-src/data/imagenet/
+*.pth
+
