@@ -20,11 +20,12 @@ class Experiment:
         self.fraction = fraction
         self.repeat = repeat
 
-    def run(self, model, data_loader, device):
-        model.to(device)
-
-        knockout(model, self.layer, self.level, self.fraction)
-        y_true, y_pred = predict(model, data_loader, device)
+    def run(self, net, data_loader, device):
+        knockout(net, self.layer, self.level, self.fraction)
+        
+        net.model.to(device)
+        
+        y_true, y_pred = predict(net.model, data_loader, device)
         accuracy = accuracy_score(y_true, y_pred)
 
         torch.cuda.empty_cache()
@@ -36,8 +37,8 @@ class Manager:
     def __init__(self, params):
         self.params = params
         self.timestamp = datetime.now().strftime("%Y%m%d%I%M%S")
-        self.expts = self.make_expts(params)
         self.csv = self.init_files()
+        self.expts = self.make_expts(params)
 
     def make_expts(self, params):
         expts = []
@@ -67,12 +68,9 @@ class Manager:
         
         return csv
 
-    def run(self, model, data_loader, device):
-        model.set_pretrained_weights()
-        
+    def run(self, net, data_loader, device):
         for e in tqdm(self.expts, desc="experiment"):
-            
-            accuracy = e.run(model, data_loader, device)
+            accuracy = e.run(net, data_loader, device)
 
             with open(self.csv, "a") as f:
                 f.write(f"{e.layer}, {e.level}, {e.fraction}, {e.repeat}, {accuracy}\n")
@@ -92,9 +90,7 @@ if __name__ == "__main__":
     num_workers = 6
     data_loader = load_data(split="val", batch_size=batch_size, num_workers=num_workers)
     
-    net = AlexNet()
-    model = net.model
-    model.to(device)
+    net = AlexNet(pretrained=True)
 
     m = Manager(params)
-    m.run(model, data_loader, device)
+    m.run(net, data_loader, device)

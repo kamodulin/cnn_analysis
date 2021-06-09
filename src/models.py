@@ -42,7 +42,7 @@ class AlexNet(BaseNet):
         super(AlexNet, self).__init__(models.alexnet())
 
         if pretrained:
-            self.set_pretrained_weights()
+            self.set_weights("~/data/model-weights/alexnet-pytorch-pretrained.pth")
 
         self.name = "alexnet"
         self.layers = { 
@@ -55,7 +55,12 @@ class AlexNet(BaseNet):
             "dense2": {"weight": "classifier.4.weight", "bias": "classifier.4.bias"},
             "dense3": {"weight": "classifier.6.weight", "bias": "classifier.6.bias"}
         }
+
+    def set_weights(self, path):
+        checkpoint = torch.load(path)
         
-    def set_pretrained_weights(self):
-        weights = torch.load("~/data/model-weights/alexnet-pytorch-pretrained.pth")
-        self.set_state(weights)
+        if "model" in checkpoint:
+            self.set_state(checkpoint["model"])
+            
+        else:
+            self.set_state(checkpoint)
