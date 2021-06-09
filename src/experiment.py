@@ -1,14 +1,17 @@
 import os
+import torch
 
 from collections import OrderedDict
 from datetime import datetime
 from itertools import product
 from tqdm import tqdm
 
+from data_loader import load_data
 from inference import predict
 from metrics import accuracy_score
 from models import AlexNet
 from perturb import knockout
+
 
 class Experiment:
     def __init__(self, layer, level, fraction, repeat):
@@ -89,7 +92,8 @@ if __name__ == "__main__":
     num_workers = 6
     data_loader = load_data(split="val", batch_size=batch_size, num_workers=num_workers)
     
-    model = AlexNet()
+    net = AlexNet()
+    model = net.model
     model.to(device)
 
     m = Manager(params)

@@ -1,5 +1,6 @@
 import torch
 
+
 def predict(model, data_loader, device):
     model.eval()
 

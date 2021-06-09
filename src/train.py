@@ -8,7 +8,8 @@ from data_loader import load_data
 from metrics import accuracy_score
 from models import AlexNet
 
-def train_one_epoch(model, epoch, batch_size, criterion, optimizer, lr_scheduler, data_loader, num_workers, device):
+
+def train_one_epoch(model, epoch, batch_size, criterion, optimizer, lr_scheduler, data_loader, device):
     model.train()
 
     training_loss = 0
@@ -48,7 +49,7 @@ def train_one_epoch(model, epoch, batch_size, criterion, optimizer, lr_scheduler
 
 
 def train(model, epochs, batch_size, criterion, optimizer, lr_scheduler, num_workers, device):
-    data_loader = load_data(split="train", batch_size=batch_size)
+    data_loader = load_data(split="train", batch_size=batch_size, num_workers=num_workers)
 
     torch.save({
         'model': model.get_state(),
@@ -63,7 +64,8 @@ def train(model, epochs, batch_size, criterion, optimizer, lr_scheduler, num_wor
 if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    model = AlexNet()
+    net = AlexNet()
+    model = net.model
     model.to(device)
 
     epochs = 90

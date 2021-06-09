@@ -4,6 +4,7 @@ from torchvision import models
 
 from data_loader import load_data
 
+
 class BaseNet:
     def __init__(self, model):
         self.model = model

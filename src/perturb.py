@@ -1,6 +1,7 @@
 import random
 import torch
 
+
 def random_indices(n, fraction):
     idx = random.sample(range(n), round(n * fraction))
     return idx
