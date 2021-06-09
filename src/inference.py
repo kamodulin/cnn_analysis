@@ -4,8 +4,8 @@ import torch
 def predict(model, data_loader, device):
     model.eval()
 
-    y_true = torch.empty(device=device)
-    y_pred = torch.empty(device=device)
+    y_true = torch.empty(0, device=device)
+    y_pred = torch.empty(0, device=device)
 
     with torch.no_grad():
         for images, labels in data_loader:
