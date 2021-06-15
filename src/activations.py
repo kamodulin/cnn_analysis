@@ -45,7 +45,7 @@ if __name__ == "__main__":
     num_workers = 6
     data_loader = load_data(split="val", batch_size=batch_size, num_workers=num_workers)
 
-    root = "data/model-weights/pytorch-vision-classification/run_1"
+    root = "~data/model-weights/pytorch-vision-classification/run_1"
 
     for num in range(0, 90):
         print(f"model_{num}")
@@ -56,4 +56,4 @@ if __name__ == "__main__":
         activations = get_activations(net, data_loader, device)
 
         timestamp = datetime.now().strftime("%Y%m%d%I%M%S")
-        torch.save(activations, f"data/activations/model_{num}_all_dense-{timestamp}.pth")
+        torch.save(activations, f"~data/activations/model_{num}_all_dense-{timestamp}.pth")
