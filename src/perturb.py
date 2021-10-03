@@ -16,7 +16,7 @@ def synapse_knockout(W, b, fraction):
         idx = random_indices(n_params, fraction)
         mask[idx] = 0
 
-        new_params.append(params * mask.reshape(params.shape))
+        new_params.append(torch.mul(params, mask.reshape(params.shape)))
 
     return new_params
 
@@ -34,7 +34,7 @@ def node_knockout(W, b, fraction):
     return new_W, new_b
 
 
-def knockout(model, layer, level, fraction):
+def knockout(net, layer, level, fraction):
     if level == "synapse":
         f = synapse_knockout
 
@@ -43,7 +43,7 @@ def knockout(model, layer, level, fraction):
 
     else:
         return None
-
-    W, b = model.get_params(layer)
+    
+    W, b = net.get_params(layer)
     new_W, new_b = f(W, b, fraction)
-    model.set_params(layer, new_W, new_b)
+    net.set_params(layer, new_W, new_b)

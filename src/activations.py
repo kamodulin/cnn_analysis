@@ -10,12 +10,12 @@ from models import AlexNet
 
 
 def hook_fn(name, activations, module, input, output):
-    activations[name].append(output.to("cpu"))
+    activations[name].append(output.half().to("cpu"))
 
 
 def set_hooks(model, activations):
-    names = ["dense1", "dense2", "dense3"]
-    layers = [model.classifier[1], model.classifier[4], model.classifier[6]]
+    names = ["conv1", "conv2", "conv3", "conv4", "conv5", "dense1", "dense2", "dense3"]
+    layers = [model.features[0], model.features[3], model.features[6], model.features[8], model.features[10], model.classifier[1], model.classifier[4], model.classifier[6]]
 
     for name, layer in zip(names, layers):
         layer.register_forward_hook(partial(hook_fn, name, activations))
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     num_workers = 6
     data_loader = load_data(split="val", batch_size=batch_size, num_workers=num_workers)
 
-    root = "~data/model-weights/pytorch-vision-classification/run_1"
+    root = "data/model-weights/pytorch-vision-classification/run_1"
 
     for num in range(0, 90):
         print(f"model_{num}")
@@ -56,4 +56,6 @@ if __name__ == "__main__":
         activations = get_activations(net, data_loader, device)
 
         timestamp = datetime.now().strftime("%Y%m%d%I%M%S")
-        torch.save(activations, f"~data/activations/model_{num}_all_dense-{timestamp}.pth")
+        torch.save(activations, f"data/activations/model_{num}-{timestamp}.pth")
+
+        del activations

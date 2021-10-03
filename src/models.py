@@ -2,8 +2,6 @@ import torch
 
 from torchvision import models
 
-from data_loader import load_data
-
 
 class BaseNet:
     def __init__(self, model):
@@ -35,14 +33,25 @@ class BaseNet:
         state_dict[layer["bias"]] = new_b
 
         self.set_state(state_dict)
+    
+    def set_weights(self, path):
+        raise NotImplementedError
+
+    def reset_weights(self):
+        if hasattr(self, 'pretrained'):
+            return self.__class__(self.pretrained)
+        else:
+            return self.__class__()
 
 
 class AlexNet(BaseNet):
     def __init__(self, pretrained=False):
         super(AlexNet, self).__init__(models.alexnet())
-
-        if pretrained:
-            self.set_weights("~/data/model-weights/alexnet-pytorch-pretrained.pth")
+        
+        self.pretrained = pretrained
+        
+        if self.pretrained:
+            self.set_weights("/home/kaa716/data/model-weights/alexnet-pytorch-pretrained.pth")
 
         self.name = "alexnet"
         self.layers = { 
