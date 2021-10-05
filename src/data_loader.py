@@ -11,9 +11,9 @@ def load_data(dataset, split, batch_size, num_workers):
     ])
 
     if dataset == "imagenet":
-        data = datasets.ImageNet(root="~/data/datasets/imagenet", split=split, transform=preprocess)
+        data = datasets.ImageNet(root="~/data/datasets/imagenet", split=split, transform=preprocess, download=True)
     elif dataset == "cifar10":
-        data = datasets.CIFAR10(root="~/data/datasets/CIFAR10", train=True if split == "train" else False, transform=preprocess)
+        data = datasets.CIFAR10(root="~/data/datasets/CIFAR10", train=True if split == "train" else False, transform=preprocess, download=True)
     else:
         raise AssertionError(f"Invalid dataset {dataset}")
     
