@@ -5,11 +5,12 @@ import torchvision
 import os
 
 from data_loader import load_data
+from inference import predict
 from metrics import accuracy_score
 from utils import progress_bar
 
 
-def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loader, device):
+def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, train_loader, validation_loader, device):
     model.train()
 
     running_loss = 0
@@ -20,7 +21,7 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loade
 
     start_time = time.time()
 
-    for i, (images, labels) in enumerate(data_loader):
+    for i, (images, labels) in enumerate(train_loader):
         images, labels = images.to(device), labels.to(device)
 
         optimizer.zero_grad()
@@ -41,7 +42,7 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loade
         batch_acc1, batch_acc5 = accuracy_score(labels, top1_pred), accuracy_score(labels, top5_pred)
         avg_acc1, avg_acc5 = accuracy_score(y_true, y_top1_pred), accuracy_score(y_true, y_top5_pred)
 
-        progress_bar((i + 1) / len(data_loader), batch_acc1=batch_acc1, batch_acc5=batch_acc5, avg_acc1=avg_acc1, avg_acc5=avg_acc5, batch_loss=running_loss / y_true.size(0))
+        progress_bar((i + 1) / len(train_loader), batch_acc1=batch_acc1, batch_acc5=batch_acc5, avg_acc1=avg_acc1, avg_acc5=avg_acc5, batch_loss=running_loss / y_true.size(0))
 
     lr_scheduler.step()
 
@@ -53,11 +54,14 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loade
             "epoch": epoch
         }, f"{args.save}/epoch{epoch}.pth")
 
+    val_acc1 = accuracy_score(*predict(model, validation_loader, device, topk=1))
+    val_acc5 = accuracy_score(*predict(model, validation_loader, device, topk=5))
+
     epoch_time_str = str(datetime.timedelta(seconds=int(time.time() - start_time)))
-    print(f"\nEpoch duration: {epoch_time_str} - Epoch acc1: {avg_acc1:.3f} acc5: {avg_acc5:.3f} loss: {running_loss / len(data_loader.dataset):.3f}")
+    print(f"\nEpoch duration: {epoch_time_str} train_acc1: {avg_acc1:.3f} train_acc5: {avg_acc5:.3f} train_loss: {running_loss / len(train_loader.dataset):.3f} val_acc1: {val_acc1:.3f} val_acc5: {val_acc5:.3f}")
 
 
-def train(model, epochs, criterion, optimizer, lr_scheduler, data_loader, device):
+def train(model, epochs, criterion, optimizer, lr_scheduler, train_loader, validation_loader, device):
     if args.save:
         torch.save({
             "model": model.state_dict(),
@@ -68,7 +72,7 @@ def train(model, epochs, criterion, optimizer, lr_scheduler, data_loader, device
 
     for epoch in range(1, epochs+1):
         print(f"Epoch {epoch}/{epochs}")
-        train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loader, device)
+        train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, train_loader, validation_loader, device)
 
 
 if __name__ == "__main__":
@@ -87,8 +91,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    data_loader = load_data(args.dataset.lower(), split="train", batch_size=args.batch_size, num_workers=args.workers)
-    num_classes = args.num_classes if args.num_classes else len(data_loader.classes)
+    train_loader = load_data(args.dataset.lower(), split="train", batch_size=args.batch_size, num_workers=args.workers)
+    validation_loader = load_data(args.dataset.lower(), split="val", batch_size=args.batch_size, num_workers=args.workers)
+
+    num_classes = args.num_classes if args.num_classes else len(train_loader.classes)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = torchvision.models.__dict__[args.model](pretrained=args.pretrained, num_classes=num_classes)
@@ -109,4 +115,4 @@ if __name__ == "__main__":
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, weight_decay=1e-4)
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
 
-    train(model, args.epochs, criterion, optimizer, lr_scheduler, data_loader, device)
+    train(model, args.epochs, criterion, optimizer, lr_scheduler, train_loader, validation_loader, device)
