@@ -94,22 +94,24 @@ if __name__ == "__main__":
     train_loader = load_data(args.dataset.lower(), split="train", batch_size=args.batch_size, num_workers=args.workers)
     validation_loader = load_data(args.dataset.lower(), split="val", batch_size=args.batch_size, num_workers=args.workers)
 
-    num_classes = args.num_classes if args.num_classes else len(train_loader.classes)
+    num_classes = 1000
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = torchvision.models.__dict__[args.model](pretrained=args.pretrained, num_classes=num_classes)
     model.to(device)
 
     if args.transfer:
-        checkpoint = torch.load(args.transfer)
-        model.load_state_dict(checkpoint["model"])
+        current = model.state_dict()
+        checkpoint = torch.load(args.transfer)["model"]
+        filtered = {name: tensor for name, tensor in checkpoint.items() if name in current and tensor.size() == current[name].size()}
+        model.load_state_dict(filtered)
 
     if args.save:
         if os.path.isdir(args.save):
             import shutil
             shutil.rmtree(args.save)
         
-        os.mkdir(args.save)
+        os.makedirs(args.save)
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, weight_decay=1e-4)
