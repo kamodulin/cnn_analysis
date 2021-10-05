@@ -54,7 +54,7 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loade
         }, f"{args.save}/epoch{epoch}.pth")
 
     epoch_time_str = str(datetime.timedelta(seconds=int(time.time() - start_time)))
-    print(f"\nEpoch duration: {epoch_time_str} - Epoch acc5: {accuracy_score(y_true, y_pred):.3f} - Epoch loss: {running_loss / len(data_loader.dataset):.3f}")
+    print(f"\nEpoch duration: {epoch_time_str} - Epoch acc1: {avg_acc1:.3f} acc5: {avg_acc5:.3f} loss: {running_loss / len(data_loader.dataset):.3f}")
 
 
 def train(model, epochs, criterion, optimizer, lr_scheduler, data_loader, device):
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    data_loader = load_data(args.dataset.lower(), split="train", batch_size=args.batch_size, num_workers=args.num_workers)
+    data_loader = load_data(args.dataset.lower(), split="train", batch_size=args.batch_size, num_workers=args.workers)
     num_classes = args.num_classes if args.num_classes else len(data_loader.classes)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -110,7 +110,3 @@ if __name__ == "__main__":
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
 
     train(model, args.epochs, criterion, optimizer, lr_scheduler, data_loader, device)
-
-    # NOTES:
-    # evaluate loop, train_loader, validation_loader
-    # topk, maybe 1 and 5?
