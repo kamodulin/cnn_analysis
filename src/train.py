@@ -15,7 +15,8 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loade
     running_loss = 0
     
     y_true = torch.empty(0, device=device)
-    y_pred = torch.empty(0, device=device)
+    y_top1_pred = torch.empty(0, device=device)
+    y_top5_pred = torch.empty(0, device=device)
 
     start_time = time.time()
 
@@ -32,12 +33,15 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loade
         running_loss += loss.item() * labels.size(0)
 
         probabilities = torch.nn.functional.softmax(output, dim=1)
-        _, pred = torch.topk(probabilities, 5)
+        _, top1_pred = torch.topk(probabilities, 1)
+        _, top5_pred = torch.topk(probabilities, 5)
     
         y_true = torch.cat((y_true, labels), 0)
-        y_pred = torch.cat((y_pred, pred), 0)
+        y_top1_pred, y_top5_pred = torch.cat((y_top1_pred, top1_pred), 0), torch.cat((y_top5_pred, top5_pred), 0)
+        batch_acc1, batch_acc5 = accuracy_score(labels, top1_pred), accuracy_score(labels, top5_pred)
+        avg_acc1, avg_acc5 = accuracy_score(y_true, y_top1_pred), accuracy_score(y_true, y_top5_pred)
 
-        progress_bar((i + 1) / len(data_loader), avg_acc5=accuracy_score(y_true, y_pred), batch_acc5=accuracy_score(labels, pred), batch_loss=running_loss / y_true.size(0))
+        progress_bar((i + 1) / len(data_loader), batch_acc1=batch_acc1, batch_acc5=batch_acc5, avg_acc1=avg_acc1, avg_acc5=avg_acc5, batch_loss=running_loss / y_true.size(0))
 
     lr_scheduler.step()
 
@@ -106,3 +110,7 @@ if __name__ == "__main__":
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
 
     train(model, args.epochs, criterion, optimizer, lr_scheduler, data_loader, device)
+
+    # NOTES:
+    # evaluate loop, train_loader, validation_loader
+    # topk, maybe 1 and 5?
