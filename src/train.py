@@ -41,24 +41,26 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, data_loade
 
     lr_scheduler.step()
 
-    torch.save({
-        "model": model.state_dict(),
-        "optimizer": optimizer.state_dict(),
-        "lr_scheduler": lr_scheduler.state_dict(),
-        "epoch": epoch
-    }, f"{args.save}/epoch{epoch}.pth")
+    if args.save:
+        torch.save({
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "lr_scheduler": lr_scheduler.state_dict(),
+            "epoch": epoch
+        }, f"{args.save}/epoch{epoch}.pth")
 
     epoch_time_str = str(datetime.timedelta(seconds=int(time.time() - start_time)))
     print(f"\nEpoch duration: {epoch_time_str} - Epoch acc5: {accuracy_score(y_true, y_pred):.3f} - Epoch loss: {running_loss / len(data_loader.dataset):.3f}")
 
 
 def train(model, epochs, criterion, optimizer, lr_scheduler, data_loader, device):
-    torch.save({
-        "model": model.state_dict(),
-        "optimizer": optimizer.state_dict(),
-        "lr_scheduler": lr_scheduler.state_dict(),
-        "epoch": 0
-    }, f"{args.save}/epoch0.pth")
+    if args.save:
+        torch.save({
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "lr_scheduler": lr_scheduler.state_dict(),
+            "epoch": 0
+        }, f"{args.save}/epoch0.pth")
 
     for epoch in range(1, epochs+1):
         print(f"Epoch {epoch}/{epochs}")
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument("--num-classes", default=0, type=int, help="number of classses (default: 0 = all classes in dataset")
     parser.add_argument("--transfer", default="", help="model weights for transfer learning")
     parser.add_argument("--workers", default=15, type=int, help="number of data loading workers")
-    parser.add_argument("--save", default="./data/model-weights/", help="model weights save directory")
+    parser.add_argument("--save", default="", help="model weights save directory e.g. ~/data/model-weights/alexnet-train")
 
     args = parser.parse_args()
 
@@ -92,11 +94,12 @@ if __name__ == "__main__":
         checkpoint = torch.load(args.transfer)
         model.load_state_dict(checkpoint["model"])
 
-    if os.path.isdir(args.save):
-        import shutil
-        shutil.rmtree(args.save)
-    
-    os.mkdir(args.save)
+    if args.save:
+        if os.path.isdir(args.save):
+            import shutil
+            shutil.rmtree(args.save)
+        
+        os.mkdir(args.save)
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, weight_decay=1e-4)
