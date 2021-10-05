@@ -94,7 +94,7 @@ if __name__ == "__main__":
     train_loader = load_data(args.dataset.lower(), split="train", batch_size=args.batch_size, num_workers=args.workers)
     validation_loader = load_data(args.dataset.lower(), split="val", batch_size=args.batch_size, num_workers=args.workers)
 
-    num_classes = 1000
+    num_classes = args.num_classes if args.num_classes else len(train_loader.classes)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = torchvision.models.__dict__[args.model](pretrained=args.pretrained, num_classes=num_classes)
