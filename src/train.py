@@ -52,7 +52,7 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, train_load
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
             "epoch": epoch
-        }, f"{args.save}/epoch{epoch}.pth")
+        }, f"{save}/epoch{epoch}.pth")
 
     val_acc1 = accuracy_score(*predict(model, val_loader, device, topk=1))
     val_acc5 = accuracy_score(*predict(model, val_loader, device, topk=5))
@@ -68,7 +68,7 @@ def train(model, epochs, criterion, optimizer, lr_scheduler, train_loader, val_l
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
             "epoch": 0
-        }, f"{args.save}/epoch0.pth")
+        }, f"{save}/epoch0.pth")
 
     for epoch in range(1, epochs+1):
         print(f"Epoch {epoch}/{epochs}")
@@ -92,6 +92,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     train_loader, val_loader, num_classes = data_loader(args.dataset.lower(), args.batch_size, args.workers, args.num_classes)
+    assert num_classes >= 5, "num_classes must be greater than or equal to 5"
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = torchvision.models.__dict__[args.model](pretrained=args.pretrained, num_classes=num_classes)
@@ -104,12 +105,10 @@ if __name__ == "__main__":
         model.load_state_dict(filtered)
 
     if args.save:
-        path = os.path.expanduser(args.save)
-        if os.path.isdir(path):
+        if os.path.isdir(args.save):
             import shutil
-            shutil.rmtree(path)
-        
-        os.makedirs(path)
+            shutil.rmtree(args.save)
+        os.mkdir(args.save)
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, weight_decay=1e-4)
