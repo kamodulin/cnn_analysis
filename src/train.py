@@ -102,7 +102,8 @@ if __name__ == "__main__":
         current = model.state_dict()
         checkpoint = torch.load(args.transfer)["model"]
         filtered = {name: tensor for name, tensor in checkpoint.items() if name in current and tensor.size() == current[name].size()}
-        model.load_state_dict(filtered)
+        missing, _ = model.load_state_dict(filtered, strict=False)
+        print(f"Dropped layer(s): {missing}")
 
     if args.save:
         if os.path.isdir(args.save):
