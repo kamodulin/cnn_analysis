@@ -52,7 +52,7 @@ def train_one_epoch(model, epoch, criterion, optimizer, lr_scheduler, train_load
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
             "epoch": epoch
-        }, f"{save}/epoch{epoch}.pth")
+        }, f"{args.save}/epoch{epoch}.pth")
 
     val_acc1 = accuracy_score(*predict(model, val_loader, device, topk=1))
     val_acc5 = accuracy_score(*predict(model, val_loader, device, topk=5))
@@ -68,7 +68,7 @@ def train(model, epochs, criterion, optimizer, lr_scheduler, train_loader, val_l
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
             "epoch": 0
-        }, f"{save}/epoch0.pth")
+        }, f"{args.save}/epoch0.pth")
 
     for epoch in range(1, epochs+1):
         print(f"Epoch {epoch}/{epochs}")
