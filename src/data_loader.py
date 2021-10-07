@@ -1,7 +1,24 @@
 import random
+import torch
 
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
+
+
+class SubsetResetIndex(Subset):
+    def __init__(self, dataset, indices, mapping):
+        self.dataset = dataset
+        self.indices = indices
+        self.mapping = mapping
+
+    def __getitem__(self, idx):
+        item = self.dataset[self.indices[idx]]
+        label = self.mapping[item[1]]
+        return (item[0], label)
+
+    def __len__(self):
+        return len(self.indices)
+
 
 def load_dataset(dataset, split):
     preprocess = transforms.Compose([
@@ -12,7 +29,7 @@ def load_dataset(dataset, split):
     ])
 
     if dataset == "imagenet":
-        data = datasets.ImageNet(root="~/data/datasets/imagenet", split=split, transform=preprocess, download=True)
+        data = datasets.ImageNet(root="~/data/datasets/imagenet", split=split, transform=preprocess)
     elif dataset == "cifar10":
         data = datasets.CIFAR10(root="~/data/datasets/CIFAR10", train=True if split == "train" else False, transform=preprocess, download=True)
     elif dataset == "cifar100":
@@ -22,18 +39,23 @@ def load_dataset(dataset, split):
 
     return data
 
+
 # add seed for deterministic choice?
 def data_loader(dataset, batch_size, num_workers, num_classes=0):
     train_data = load_dataset(dataset, "train")
     val_data = load_dataset(dataset, "val")
 
+    total_num_classes = len(train_data.classes)
+
     if not num_classes:
         train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers)
         val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-        num_classes =  len(train_loader.classes)
+        num_classes = total_num_classes
         
     else:
-        targets = random.sample(range(len(train_data.classes)), num_classes)
+        assert num_classes <= total_num_classes, "num_classes cannot exceed "
+
+        targets = random.sample(range(total_num_classes), num_classes)
         mapping = {x:i for i, x in enumerate(targets)} 
 
         train_data_subset = create_subset(train_data, targets, mapping)
@@ -41,12 +63,11 @@ def data_loader(dataset, batch_size, num_workers, num_classes=0):
         
         train_loader = DataLoader(train_data_subset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
         val_loader = DataLoader(val_data_subset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    
+        
     return train_loader, val_loader, num_classes
 
 
 def create_subset(data, targets, mapping):
     idx = [i for i, label in enumerate(data.targets) if label in targets]
-    data.targets = [mapping[x] if x in mapping.keys() else None for x in data.targets]
-    subset = Subset(data, idx)
+    subset = SubsetResetIndex(data, idx, mapping)
     return subset
