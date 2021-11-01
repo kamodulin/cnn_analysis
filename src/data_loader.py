@@ -30,8 +30,6 @@ def load_dataset(dataset, split):
 
     if dataset == "imagenet":
         data = datasets.ImageNet(root="~/data/datasets/imagenet", split=split, transform=preprocess)
-    elif dataset == "cifar10":
-        data = datasets.CIFAR10(root="~/data/datasets/CIFAR10", train=True if split == "train" else False, transform=preprocess, download=True)
     elif dataset == "cifar100":
         data = datasets.CIFAR100(root="~/data/datasets/CIFAR100", train=True if split == "train" else False, transform=preprocess, download=True)
     else:
