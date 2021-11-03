@@ -142,3 +142,5 @@ cython_debug/
 .vscode
 scripts/
 *.pth
+
+*.pdf
