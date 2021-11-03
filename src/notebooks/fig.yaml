@@ -1,0 +1,43 @@
+font.family : Arial
+font.size : 7.25
+pdf.fonttype : 42
+axes.titlepad: 6
+axes.labelpad: 2.5
+xtick.labelsize : 6
+ytick.labelsize : 6
+xtick.major.width: 0.5
+ytick.major.width: 0.5
+xtick.major.size : 1.75
+ytick.major.size : 1.75
+xtick.major.pad : 1.25
+ytick.major.pad : 1.25
+xtick.minor.visible: True
+ytick.minor.visible: True
+xtick.minor.width: 0.5
+ytick.minor.width: 0.5
+xtick.minor.size : 1.75
+ytick.minor.size : 1.75
+xtick.minor.pad : 1.25
+ytick.minor.pad : 1.25
+axes.titlesize : 9
+axes.labelsize : 7.25
+axes.linewidth : 0.5
+lines.markeredgewidth : 0.5
+errorbar.capsize: 1
+figure.figsize : 2, 1.25
+axes.spines.right: False
+axes.spines.top: False
+legend.frameon: False
+legend.title_fontsize: 7.25
+legend.fontsize: 7.25
+legend.borderpad:     0
+legend.labelspacing:  0.25 
+legend.handlelength:  1.0
+legend.handleheight:  0.5
+legend.handletextpad: 0.25
+legend.borderaxespad: 0
+figure.dpi : 300
+savefig.transparent : True
+savefig.bbox : tight
+savefig.facecolor : (0,0,0,0)
+savefig.dpi : 300
