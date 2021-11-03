@@ -13,6 +13,7 @@ def synapse_knockout(W, b, fraction):
     new_params = []
 
     for params in (W, b):
+        params = params.cpu()
         n_params = params.numel()
         mask = torch.ones(n_params)
         idx = random_indices(n_params, fraction)
