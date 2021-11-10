@@ -1,6 +1,0 @@
-Namespace(analysis=['synapse', 'node'], batch_size=256, dataset='cifar100', fraction=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], layers='all', load_weights='C:/Users/Kamran Ahmed/Developer/python/projects/data/model-weights/alexnet-cifar100-train/epoch90.pth', model='alexnet', repeats=1, workers=15)
-
-layers: ['features.0', 'features.3', 'features.6', 'features.8', 'features.10', 'classifier.1', 'classifier.4', 'classifier.6']
-levels: ['synapse', 'node']
-fraction: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-repeats: range(0, 1)
