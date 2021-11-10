@@ -61,6 +61,7 @@ class Manager:
         meta = f"{basedir}/{self.timestamp}-metadata.txt"
 
         with open(meta, "w") as f:
+            f.write(f"{str(args)}\n\n")
             for key, value in self.params.items():
                 f.write(f"{str(key)}: {str(value)}\n")
 
@@ -89,10 +90,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="alexnet", help="model")
     parser.add_argument("--dataset", default="imagenet", help="dataset")
     parser.add_argument("-b", "--batch-size", default=256, type=int)
-    parser.add_argument("--workers",
-                        default=15,
-                        type=int,
-                        help="number of data loading workers")
+    parser.add_argument("--load-weights", default="", help="model weights to load, default is to load PyTorch pretrained weights")
     parser.add_argument("--layers",
                         nargs="+",
                         default="all",
@@ -110,6 +108,10 @@ if __name__ == "__main__":
                         default=1,
                         type=int,
                         help="number of repeats")
+    parser.add_argument("--workers",
+                        default=15,
+                        type=int,
+                        help="number of data loading workers")
 
     args = parser.parse_args()
 
@@ -121,9 +123,14 @@ if __name__ == "__main__":
     num_classes = len(val_data.classes)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = torchvision.models.__dict__[args.model](
-        pretrained=True,
-        num_classes=num_classes)  # does not work for CIFAR100 yet
+
+    if args.load_weights:
+        model = torchvision.models.__dict__[args.model](pretrained=False, num_classes=num_classes)
+        checkpoint = torch.load(args.load_weights)["model"]
+        set_state_dict(model, checkpoint)
+    else:
+        model = torchvision.models.__dict__[args.model](pretrained=True, num_classes=num_classes)
+
     pretrained_weights = get_state_dict(model)
 
     if args.layers == "all":
