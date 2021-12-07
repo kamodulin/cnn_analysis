@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     try:
         model = torchvision.models.__dict__[args.model](pretrained=args.pretrained, num_classes=num_classes)
-    except:
+    except KeyError:
         model = models.__dict__[args.model](num_classes=num_classes)
         
     model.to(device)
