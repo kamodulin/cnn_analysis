@@ -4,6 +4,8 @@ import torch
 import torchvision
 import os
 
+
+import models
 from data_loader import data_loader
 from inference import predict
 from metrics import accuracy_score
@@ -95,7 +97,12 @@ if __name__ == "__main__":
     assert num_classes >= 5, "num_classes must be greater than or equal to 5"
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = torchvision.models.__dict__[args.model](pretrained=args.pretrained, num_classes=num_classes)
+
+    try:
+        model = torchvision.models.__dict__[args.model](pretrained=args.pretrained, num_classes=num_classes)
+    except:
+        model = models.__dict__[args.model](num_classes=num_classes)
+        
     model.to(device)
 
     if args.transfer:
