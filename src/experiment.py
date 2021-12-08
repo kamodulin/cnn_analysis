@@ -7,7 +7,9 @@ from datetime import datetime
 from itertools import product
 from torch.utils.data import DataLoader
 
-from data_loader import load_dataset
+import models
+
+from data_loader import data_loader
 from inference import predict
 from metrics import accuracy_score
 from perturb import knockout
@@ -21,13 +23,13 @@ class Experiment:
         self.fraction = fraction
         self.repeat = repeat
 
-    def run(self, model, data_loader, device):
+    def run(self, model, data_loader, device, topk):
         # reset state_dict
         set_state_dict(model, pretrained_weights)
         knockout(model, self.layer, self.level, self.fraction)
         model.to(device)
 
-        y_true, y_pred = predict(model, data_loader, device, topk=5)
+        y_true, y_pred = predict(model, data_loader, device, topk=topk)
         accuracy = accuracy_score(y_true, y_pred)
         torch.cuda.empty_cache()
 
@@ -70,10 +72,10 @@ class Manager:
 
         return csv
 
-    def run(self, model, data_loader, device):
+    def run(self, model, data_loader, device, topk):
         for i, expt in enumerate(self.expts):
 
-            accuracy = expt.run(model, data_loader, device)
+            accuracy = expt.run(model, data_loader, device, topk)
 
             with open(self.csv, "a") as f:
                 f.write(
@@ -90,6 +92,17 @@ if __name__ == "__main__":
     parser.add_argument("--model", default="alexnet", help="model")
     parser.add_argument("--dataset", default="imagenet", help="dataset")
     parser.add_argument("-b", "--batch-size", default=256, type=int)
+    parser.add_argument(
+        "--num-classes",
+        type=int,
+        help=
+        "number of classes in validation split (default uses all classes in dataset)"
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="deterministic sampling of classes if num_classes is not None")
+    parser.add_argument("--topk", default=5, type=int, help="topk accuracy score")
     parser.add_argument(
         "--load-weights",
         default="",
@@ -119,18 +132,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    val_data = load_dataset(args.dataset.lower(), split="val")
-    val_loader = DataLoader(val_data,
-                            batch_size=args.batch_size,
-                            shuffle=True,
-                            num_workers=args.workers)
-    num_classes = len(val_data.classes)
+    _, val_loader, num_classes = data_loader(args.dataset.lower(),
+                                             args.batch_size, args.workers,
+                                             args.num_classes, args.seed)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     if args.load_weights:
-        model = torchvision.models.__dict__[args.model](
-            pretrained=False, num_classes=num_classes)
+        try:
+            model = torchvision.models.__dict__[args.model](
+                pretrained=False, num_classes=num_classes)
+        except KeyError:
+            model = models.__dict__[args.model](num_classes=num_classes)
         checkpoint = torch.load(args.load_weights)["model"]
         set_state_dict(model, checkpoint)
     else:
@@ -163,4 +176,4 @@ if __name__ == "__main__":
                          repeats=range(args.repeats))
 
     m = Manager(params)
-    m.run(model, val_loader, device)
+    m.run(model, val_loader, device, args.topk)

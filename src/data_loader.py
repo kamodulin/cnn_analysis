@@ -38,8 +38,8 @@ def load_dataset(dataset, split):
     return data
 
 
-# add seed for deterministic choice?
-def data_loader(dataset, batch_size, num_workers, num_classes=0):
+def data_loader(dataset, batch_size, num_workers, num_classes=None, seed=None):
+
     train_data = load_dataset(dataset, "train")
     val_data = load_dataset(dataset, "val")
 
@@ -52,8 +52,12 @@ def data_loader(dataset, batch_size, num_workers, num_classes=0):
         
     else:
         assert num_classes <= total_num_classes, "num_classes cannot exceed the total number of classes"
-
+        
+        if seed:
+            random.seed(seed)
+            
         targets = random.sample(range(total_num_classes), num_classes)
+        print(f"Target classes: {targets}")
         mapping = {x:i for i, x in enumerate(targets)} 
 
         train_data_subset = create_subset(train_data, targets, mapping)

@@ -4,8 +4,8 @@ import torch
 import torchvision
 import os
 
-
 import models
+
 from data_loader import data_loader
 from inference import predict
 from metrics import accuracy_score
@@ -86,14 +86,15 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", default=90, type=int, help="total number of epochs")
     parser.add_argument("-b", "--batch-size", default=256, type=int)
     parser.add_argument("--pretrained", action="store_true", help="use pretrained model")
-    parser.add_argument("--num-classes", default=0, type=int, help="number of classses (default: 0 = all classes in dataset")
+    parser.add_argument("--num-classes", type=int, help="number of classes (default uses all classes in dataset")
+    parser.add_argument("--seed", type=int, help="deterministic sampling of classes if num_classes is not None")
     parser.add_argument("--transfer", default="", help="model weights for transfer learning")
     parser.add_argument("--workers", default=15, type=int, help="number of data loading workers")
     parser.add_argument("--save", default="", help="model weights save directory e.g. ~/data/model-weights/alexnet-train")
 
     args = parser.parse_args()
 
-    train_loader, val_loader, num_classes = data_loader(args.dataset.lower(), args.batch_size, args.workers, args.num_classes)
+    train_loader, val_loader, num_classes = data_loader(args.dataset.lower(), args.batch_size, args.workers, args.num_classes, args.seed)
     assert num_classes >= 5, "num_classes must be greater than or equal to 5"
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
