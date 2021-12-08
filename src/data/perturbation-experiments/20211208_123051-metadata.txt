@@ -1,0 +1,6 @@
+Namespace(analysis=['synapse', 'node'], batch_size=2048, dataset='imagenet', fraction=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], layers='all', load_weights='C:/Users/Kamran Ahmed/data/model-weights/simplenet-imagenet-train/epoch20.pth', model='simplenet', num_classes=10, repeats=3, seed=42, topk=1, workers=15)
+
+layers: ['features.0', 'features.3', 'features.6', 'classifier']
+levels: ['synapse', 'node']
+fraction: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+repeats: range(0, 3)
