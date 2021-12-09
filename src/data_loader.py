@@ -54,9 +54,12 @@ def data_loader(dataset, batch_size, num_workers, num_classes=None, seed=None):
         assert num_classes <= total_num_classes, "num_classes cannot exceed the total number of classes"
         
         if seed:
-            random.seed(seed)
+            _random = random.Random(seed)
+            sample = _random.sample
+        else:
+            sample = random.sample
             
-        targets = random.sample(range(total_num_classes), num_classes)
+        targets = sample(range(total_num_classes), num_classes)
         print(f"Target classes: {targets}")
         mapping = {x:i for i, x in enumerate(targets)} 
 
